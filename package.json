@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "node practice3.js"
+  },
+  "dependencies": {
+    "axios": "^0.17.1"
+  }
+}
