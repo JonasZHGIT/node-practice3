@@ -32,7 +32,7 @@ http.createServer(function(req, res) {
 				status = true;
 				var result = {
 					original_url: pathname,
-					short_url: req.headers.host + '/' + value.fake
+					short_url: 'https://' + req.headers.host + '/' + value.fake
 				};
 				res.end(JSON.stringify(result));
 			}
@@ -43,7 +43,7 @@ http.createServer(function(req, res) {
 				var stamp = new Date().getTime();
 				var result = {
 					original_url: pathname,
-					short_url: req.domain + req.headers.host + '/' + stamp
+					short_url: 'https://' + req.headers.host + '/' + stamp
 				};
 				var url_obj = {};
 				url_obj.fake = stamp;
