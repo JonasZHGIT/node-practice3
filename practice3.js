@@ -43,7 +43,7 @@ http.createServer(function(req, res) {
 				var stamp = new Date().getTime();
 				var result = {
 					original_url: pathname,
-					short_url: req.headers.host + '/' + stamp
+					short_url: req.domain + req.headers.host + '/' + stamp
 				};
 				var url_obj = {};
 				url_obj.fake = stamp;
