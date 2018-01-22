@@ -6,6 +6,8 @@ var axios = require('axios');
 var url_arr = [];
 
 http.createServer(function(req, res) {
+	debugger;
+	console.log(url_arr);
 	var status = false;
 	if(req.url === '/favicon.ico') {
 		res.end();
@@ -18,17 +20,22 @@ http.createServer(function(req, res) {
 			res.end();
 		});
 	} else {
-		console.log(url_arr);
 		var pathname = url.parse(req.url).pathname.substring(1);
 		if(pathname.search(/new/i) === 0) {
 			pathname = pathname.substring(4);
 		}
 		url_arr.forEach(function(value) {
 			if(req.url === '/' + value.fake) {
-				res.writeHeader(302, {'Location': value.real});
-				res.end();
+				if(value.valid) {
+					res.writeHeader(302, {'Location': value.real});
+					res.end();
+				} else {
+					var error = {
+						error: 'No short url found for given input'
+					};
+					res.end(JSON.stringify(error));
+				}
 			} else if(pathname === value.real) {
-				console.log("here");
 				status = true;
 				var result = {
 					original_url: pathname,
@@ -39,25 +46,39 @@ http.createServer(function(req, res) {
 		});
 		if(!status) {
 			axios.get(pathname).then(resp => {
-				console.log("yes");
-				var stamp = new Date().getTime();
-				var result = {
-					original_url: pathname,
-					short_url: 'https://' + req.headers.host + '/' + stamp
-				};
-				var url_obj = {};
-				url_obj.fake = stamp;
-				url_obj.real = pathname;
-				url_arr.push(url_obj);
-				console.log(url_obj);
+				var result = timeStamp(req, pathname, true);
 				res.end(JSON.stringify(result));
 			}).catch(err => {
-				console.log("no");
-				var error = {
-					error: 'URL invalid'
-				};
-				res.end(JSON.stringify(error));
+				if(url.parse(req.url).query.search(/allow=true/i) >= 0) {
+					var result = timeStamp(req, pathname, false);
+					res.end(JSON.stringify(result));
+				} else {
+					var error = {
+						error: 'URL invalid'
+					};
+					res.end(JSON.stringify(error));
+				}
 			});
 		}
 	}
 }).listen(process.env.PORT || 8000);
+
+function timeStamp(req, pathname, url_valid) {
+	var stamp = new Date().getTime();
+	var result = {
+		original_url: pathname,
+		short_url: 'https://' + req.headers.host + '/' + stamp
+	};
+	var url_obj = {};
+	url_obj.fake = stamp;
+	url_obj.real = pathname;
+	url_obj.valid = url_valid;
+	url_arr.push(url_obj);
+	return result;
+}
+
+
+
+
+
+
